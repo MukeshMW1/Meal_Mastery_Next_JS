@@ -45,7 +45,7 @@ export function Signup() {
           href="/api/auth/google"
           className="flex items-center justify-center p-2 border border-gray-300 rounded text-blue-500 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 w-full"
         >
-          <img src="https://cdn2.hubspot.net/hubfs/53/image8-2.jpg" alt="Google" className="h-6 w-6 mr-2" />
+          <img src="https://cdn2.hubspot.net/hubfs/53/image8-2.jpg" alt="Google" className="h-6 w-12 mr-2" />
           <span>Continue with Google</span>
         </a>
         <a

@@ -5,7 +5,7 @@ import ThemeToggle from '@/components/Toogle';
  const Chat=()=>{
     return(
 
-<div className='dark:bg-gray-900 dark:text-gray-100 h-screen p-8'>
+<div className='dark:bg-gray-900 dark:text-gray-100 min-h-dvh p-8'>
    <ThemeToggle /> 
 <Header/>
 <Chatbot/>

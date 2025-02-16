@@ -3,13 +3,21 @@ from PIL import Image
 from flask_cors import CORS
 import torch
 from transformers import GPT2Tokenizer, GPT2LMHeadModel, AutoImageProcessor, AutoModelForImageClassification
+from inference_sdk import InferenceHTTPClient
+import torchvision.transforms as transforms
 
 app = Flask(__name__)
 CORS(app)
 
+# Initialize the Inference Client for ingredient detection
+CLIENT = InferenceHTTPClient(
+    api_url="https://detect.roboflow.com",
+    api_key="UAEhJTTEiYuSU7uPrBFN"
+)
+
 # Model paths for both image classification and recipe generation
-image_model_path = "illusion002/food-image-classification"  # Update to the correct model path if local
-recipe_model_path = "Shresthadev403/controlled-food-recipe-generation"  # Update to the correct model path if local
+image_model_path = "illusion002/food-image-classification"
+recipe_model_path = "Shresthadev403/controlled-food-recipe-generation"
 
 # Load image classification model
 processor = AutoImageProcessor.from_pretrained(image_model_path)
@@ -20,57 +28,33 @@ recipe_tokenizer = GPT2Tokenizer.from_pretrained("./controlled-food-recipe-gener
 recipe_model = GPT2LMHeadModel.from_pretrained('./controlled-food-recipe-generation')
 
 recipe_tokenizer.add_special_tokens({'additional_special_tokens': ['<RECIPE_END>', '<INPUT_START>', '<INSTR_START>']})
-recipe_model.resize_token_embeddings(len(recipe_tokenizer))  # Resize embeddings to include new tokens
+recipe_model.resize_token_embeddings(len(recipe_tokenizer))
 
 def convert_tokens_to_string(tokens):
-    """
-    Converts a sequence of tokens (string) into a single string.
-    """
     if tokens is None:
         return ""
-    
     cleaned_tokens = [token for token in tokens if token is not None]
     text = recipe_tokenizer.decode(cleaned_tokens, skip_special_tokens=True) if cleaned_tokens else ""
     return text
 
 def generate_text(prompt):
-    # Set the custom EOS token ID in the model configuration
     custom_eos_token_id = recipe_tokenizer.encode('<RECIPE_END>', add_special_tokens=False)[0]
     recipe_model.config.eos_token_id = custom_eos_token_id
-
     recipe_model.eval()
-
-    # Tokenize the input prompt
     input_ids = recipe_tokenizer.encode(prompt, return_tensors='pt')
     attention_mask = torch.ones_like(input_ids)
-
-    # Generate the recipe text
     output = recipe_model.generate(input_ids=input_ids, attention_mask=attention_mask, max_length=500, num_return_sequences=1, eos_token_id=custom_eos_token_id)
-
-
     generated_text = recipe_tokenizer.decode(output[0], skip_special_tokens=True)
-    # Convert tokens to string
-    generated_text = generated_text.replace('<INPUT_START>', '').replace('<INSTR_START>', '')
-
-    # Add newlines before each special token for readability
+    generated_text = generated_text.replace('<INPUT_START>', '').replace('<INSTR_START>', '').replace('<NEXT_INPUT>','\n').replace('<INGR_START>', '').replace('<NEXT_INGR>','\n').replace('<NEXT_INSTR>','\n').replace('<TITLE_START>','')
     generated_text = generated_text.replace('<', '\n<')
-
-    # Post-process and clean the generated text
     return generated_text
-
-
 
 @app.route('/generate_recipe', methods=['POST'])
 def generate_recipe():
     data = request.json
     prompt = data['dishName']
-    full_prompt = f"Provide a step-by-step recipe to make {prompt} "
     print(f"Generating recipe for: {prompt}")
-
-    # Generate text using the fine-tuned model
-    generated_text = generate_text(full_prompt)
-
-    # Ensure to return structured content
+    generated_text = generate_text(prompt)
     return jsonify({'generated_text': generated_text})
 
 @app.route('/classify', methods=['POST'])
@@ -82,19 +66,49 @@ def classify_image():
     try:
         image = Image.open(image_file).convert('RGB').resize((224, 224))
         inputs = processor(images=image, return_tensors="pt")
-        
-        # Classify the image
         with torch.no_grad():
             outputs = image_model(**inputs)
+        
         predicted_index = torch.argmax(outputs.logits, dim=-1).item()
+        confidence = torch.softmax(outputs.logits, dim=-1)[0][predicted_index].item()
 
+        if confidence < 0.1:  # If confidence is below 10%, return no result
+            return jsonify({'error': 'Low confidence in classification result'}), 400
+        
         class_labels = image_model.config.id2label
         predicted_label = class_labels.get(predicted_index, "Unknown Dish")
-
-        return jsonify({'dishName': predicted_label})
+        
+        return jsonify({'dishName': predicted_label, 'confidence': confidence})
     
     except Exception as e:
         return jsonify({'error': f'Failed to process image: {str(e)}'}), 500
+
+def preprocess_image(image):
+    transform = transforms.Compose([
+        transforms.Resize((224, 224)),
+        transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2, hue=0.1),  # Improve contrast
+        transforms.ToTensor(),
+        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])  # Normalize
+    ])
+    return transform(image)
+
+@app.route('/detect_ingredients', methods=['POST'])
+def detect_ingredients():
+    if 'image' not in request.files:
+        return jsonify({'error': 'No image provided'}), 400
+    
+    image_file = request.files['image']
+    try:
+        image = Image.open(image_file).convert('RGB')
+        processed_image = preprocess_image(image)  # Apply transformations
+    except Exception as e:
+        return jsonify({'error': 'Failed to preprocess image'}), 400
+    
+    result = CLIENT.infer(image, model_id="food-ingredients-detection-6ce7j/1")
+    
+    
+    
+    return jsonify({'ingredients': result})
 
 if __name__ == '__main__':
     app.run(debug=True)

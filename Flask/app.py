@@ -100,7 +100,7 @@ def detect_ingredients():
     image_file = request.files['image']
     try:
         image = Image.open(image_file).convert('RGB')
-        processed_image = preprocess_image(image)  # Apply transformations
+        processed_image = preprocess_image(image)  
     except Exception as e:
         return jsonify({'error': 'Failed to preprocess image'}), 400
     

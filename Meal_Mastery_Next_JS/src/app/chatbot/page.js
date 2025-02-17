@@ -9,12 +9,15 @@ const Chat = () => {
     const [activeChatbot, setActiveChatbot] = useState('chatbot1');
 
     return (
-        <div className='dark:bg-gray-900 dark:text-gray-100 min-h-dvh p-8'>
-            <ThemeToggle />
+        <div className='dark:bg-gray-900 dark:text-gray-100 min-h-dvh pb-8 px-8'>
+            <div className='flex justify-between items-center'>
+
             <Header />
+            <ThemeToggle />
+            </div>
             
             {/* Buttons to switch between chatbots */}
-            <div className="flex gap-4 mb-4">
+            <div className="flex gap-4 mb-2">
                 <button 
                     onClick={() => setActiveChatbot('chatbot1')} 
                     className={`px-4 py-2 rounded ${activeChatbot === 'chatbot1' ? 'bg-blue-500 text-white' : 'bg-gray-300 text-black'}`}

@@ -16,20 +16,16 @@ export const IngredientChatbot = () => {
       const userMessage = message;
       setChat([...chat, { type: 'user', text: userMessage }]);
       setMessage('');
-      setIsLoading(true);
-
+      setIsLoading(true);  // Set loading true before starting the request
+  
       setTimeout(() => {
         const analyzingReply = 'Analyzing your food item...';
         setChat((prevChat) => [...prevChat, { type: 'bot', text: analyzingReply }]);
-        generateRecipeFromFlask(userMessage);
-
-        setTimeout(() => {
-          setIsLoading(false);
-        }, 2000);
+        generateRecipeFromFlask(userMessage);  // Call the function after showing analyzing message
       }, 1000);
     }
   };
-
+  
   const generateRecipeFromFlask = async (dishName) => {
     try {
       const response = await fetch('http://localhost:5000/generate_recipe', {
@@ -46,55 +42,66 @@ export const IngredientChatbot = () => {
       if (data.generated_text) {
         const rawText = data.generated_text;
   
-        const titleRegex = /<TITLE_START>\s*(.*?)\s*<TITLE_END>/;
-        const ingredientsRegex = /<INGR_START>\s*(.*?)\s*(<NEXT_INGR>|<INGR_END>)/g;
-        const instructionsRegex = /<INSTR_START>\s*(.*?)\s*(<NEXT_INSTR>|<INSTR_END>)/g;
-  
-        const titleMatch = rawText.match(titleRegex);
-        const ingredientMatches = rawText.match(ingredientsRegex);
-        const instructionMatches = rawText.match(instructionsRegex);
+        const titleMatch = rawText.match(/\s*(.*?)\s*<TITLE_END>/);
+        const inputMatch = rawText.match(/<TITLE_END>\s*([\s\S]*?)\s*<INPUT_END>/);
+        const ingredientsMatch = rawText.match(/<INPUT_END>\s*([\s\S]*?)\s*<INGR_END>/);
+        const instructionsMatch = rawText.match(/<INGR_END>\s*([\s\S]*?)\s*<INSTR_END>/);
   
         const title = titleMatch ? titleMatch[1].trim() : 'Recipe Title';
-        const ingredients = ingredientMatches && ingredientMatches.length > 0 
-            ? ingredientMatches.map(ingredient => ingredient.replace('<INGR_START>', '').replace('<NEXT_INGR>', '').replace('<INGR_END>', '').trim())
-            : ['No ingredients available.'];
+        const input = inputMatch
+          ? inputMatch[1].split('\n').map((item) => item.trim()).filter(Boolean)
+          : ['No input available.'];
+        const ingredients = ingredientsMatch
+          ? ingredientsMatch[1].split('\n').map((ing) => ing.trim()).filter(Boolean)
+          : ['No ingredients available.'];
+        const instructions = instructionsMatch
+          ? instructionsMatch[1].split('\n').map((step) => step.trim()).filter(Boolean)
+          : ['No instructions available.'];
   
-        const instructions = instructionMatches && instructionMatches.length > 0 
-            ? instructionMatches.map(instruction => instruction.replace('<INSTR_START>', '').replace('<NEXT_INSTR>', '').replace('<INSTR_END>', '').trim())
-            : ['No instructions available.'];
-  
-        const recipeComponent = (
-          <div className="recipe-container bg-white text-black p-6 rounded-lg shadow-md">
-            <h2 className="text-3xl font-bold text-red-600">Recipe: {title}</h2>
-            <h3 className="text-xl font-semibold mt-4">👩‍🍳 Ingredients</h3>
-            <ul className="pl-5">
-              {ingredients.map((ingredient, index) => (
-                <li key={index} className="text-sm">{ingredient}</li>
-              ))}
-            </ul>
-            <h3 className="text-xl font-semibold mt-4">👨‍🍳 Instructions</h3>
-            <ol className="pl-5">
-              {instructions.map((instruction, index) => (
-                <li key={index} className="text-sm">{instruction}</li>
-              ))}
-            </ol>
-          </div>
-        );
-  
-        setChat((prev) => [...prev, { type: 'bot', text: recipeComponent }]);
+        setChat((prev) => [
+          ...prev,
+          {
+            type: 'bot',
+            text: (
+              <div className="recipe-container bg-white text-black p-6 rounded-lg shadow-md text-xs">
+                <h2 className="text-xl font-bold text-red-600">Recipe: {title}</h2>
+                <h3 className="text-md font-semibold mt-4">📝 Input</h3>
+                <ul className="pl-5 text-sm">
+                  {input.map((item, index) => (
+                    <li key={index}>{item}</li>
+                  ))}
+                </ul>
+                <h3 className="text-md font-semibold mt-4">👩‍🍳 Ingredients</h3>
+                <ul className="pl-5 text-sm">
+                  {ingredients.map((ingredient, index) => (
+                    <li key={index}>{ingredient}</li>
+                  ))}
+                </ul>
+                <h3 className="text-md font-semibold mt-4">👨‍🍳 Instructions</h3>
+                <ol className="pl-5 text-sm">
+                  {instructions.map((instruction, index) => (
+                    <li key={index}>{instruction}</li>
+                  ))}
+                </ol>
+              </div>
+            ),
+          },
+        ]);
       }
     } catch (error) {
       console.error('Error:', error);
       setChat((prev) => [...prev, { type: 'bot', text: '🚨 Error generating recipe. Try again!' }]);
+    } finally {
+      setIsLoading(false);  // Ensure loading is set to false only after recipe generation is done
     }
   };
-
+  
   const handleImageUpload = async (e) => {
     const file = e.target.files[0];
     if (file) {
       const reader = new FileReader();
       reader.onloadend = async () => {
-        setChat([...chat, { type: 'user', text: <img src={reader.result} alt="uploaded" className="max-w-full h-auto" /> }]);
+        setChat([...chat, { type: 'user', text: <img src={reader.result} alt="uploaded" className="max-w-[300px] h-auto rounded-lg shadow-md" /> }]);
         setIsLoading(true);
   
         const formData = new FormData();
@@ -111,10 +118,9 @@ export const IngredientChatbot = () => {
             console.log(result);
             console.log("Ingredients detected:", result.ingredients.predictions);
   
-            // Ensure predictions exist and have a valid class
             if (result.ingredients.predictions && result.ingredients.predictions.length > 0) {
               const detectedIngredients = result.ingredients.predictions
-                .map(item => item.class) // Extract the ingredient class
+                .map(item => item.class)
                 .join(", ");
   
               if (detectedIngredients) {
@@ -142,7 +148,6 @@ export const IngredientChatbot = () => {
     }
   };
   
-  
   const handleKeyPress = (e) => {
     if (e.key === 'Enter') {
       handleSubmit();
@@ -150,8 +155,8 @@ export const IngredientChatbot = () => {
   };
 
   return (
-    <div className='flex flex-col items-center mt-[40px] mb-[100px] mx-[40px]'>
-      <div className='border rounded-[12px] p-[20px] w-full max-w-[800px] h-auto flex flex-col justify-between min-h-[400px] bg-neutral-800 text-neutral-100'>
+    <div className='flex flex-col items-center mt-[40px] mb-[100px] mx-[10px] h-dvh'>
+      <div className='border rounded-[12px] p-[10px] w-[80vw] max-w-[100vw] h-auto flex flex-col justify-between min-h-[440px] bg-neutral-800 text-neutral-100'>
         <div className='flex flex-col gap-[10px] max-h-[400px] overflow-y-auto scrollbar-hidden'>
           {chat.map((entry, index) => (
             <div
@@ -178,17 +183,17 @@ export const IngredientChatbot = () => {
             placeholder='Enter the ingredients or the food'
             value={message}
             onChange={(e) => setMessage(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && handleSubmit()}  // Trigger on Enter
-            className='border rounded-[10px] p-[10px] text-[10px] lg:w-[200px] outline-none text-black'
+            onKeyDown={(e) => e.key === 'Enter' && handleSubmit()}
+            className='border rounded-[10px] p-[10px] text-[14px] lg:w-[200px] outline-none text-black'
           />
           <div className='flex gap-[10px]'>
             <button
               onClick={handleSubmit}
-              className='border rounded-[10px] p-[10px] text-[10px] cursor-pointer bg-blue-500'
+              className='border rounded-[10px] p-[10px] text-[14px] cursor-pointer bg-blue-500'
             >
               Submit
             </button>
-            <label className='border rounded-[10px] p-[10px] text-[10px] cursor-pointer'>
+            <label className='border rounded-[10px] p-[10px] text-[14px] cursor-pointer'>
               Image
               <input type="file" onChange={handleImageUpload} className='hidden' />
             </label>

@@ -47,7 +47,7 @@ export const Header=()=>{
             </svg>
         </button>
 
-        <div class="flex flex-col flex-grow h-full">
+        <div class="hidden flex-col flex-grow h-full">
             <nav class="flex flex-col flex-1 mt-10 space-y-2">
                 <a href="/" title="" class="flex w-full py-2 font-medium text-white transition-all duration-200 focus:text-opacity-70"> Home </a>
 

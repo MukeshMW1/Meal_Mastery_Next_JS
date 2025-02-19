@@ -135,7 +135,7 @@ export const Chatbot = () => {
   };
 
   return (
-    <div className='flex flex-col items-center mt-[40px] mb-[100px] mx-[10px] h-dvh'>
+    <div className='flex flex-col items-center mt-[40px] mb-[20px] mx-[10px] h-dvh'>
       <div className='border rounded-[12px] p-[10px] w-[80vw] max-w-[100vw] h-auto flex flex-col justify-between min-h-[440px] bg-neutral-800 text-neutral-100'>
         <div className='flex flex-col gap-[10px] max-h-[400px] overflow-y-auto scrollbar-hidden'>
           {chat.map((entry, index) => (

@@ -26,13 +26,13 @@ export const Header=()=>{
                 </button>
 
                 <div class="hidden lg:flex lg:items-center lg:space-x-10">
-                    <a href="#" title="" class="text-base font-medium text-white"> Home </a>
+                    <a href="/" title="" class="text-base font-medium text-white"> Home </a>
 
-                    <a href="#" title="" class="text-base font-medium text-white"> Chatbot </a>
+                    <a href="/chatbot" title="" class="text-base font-medium text-white"> Chatbot </a>
 
                     <a href="#" title="" class="text-base font-medium text-white"> Resources </a>
 
-                    <a href="#" title="" class="text-base font-medium text-white"> Contact </a>
+                    <a href="/contact" title="" class="text-base font-medium text-white"> Contact </a>
                 </div>
 
                 <a href="#" title="" class="items-center justify-center hidden px-6 py-3 text-base font-semibold text-black transition-all duration-200 bg-yellow-400 border border-transparent rounded-full lg:inline-flex hover:bg-yellow-500 focus:bg-yellow-500" role="button"> Join Now </a>
@@ -49,13 +49,13 @@ export const Header=()=>{
 
         <div class="flex flex-col flex-grow h-full">
             <nav class="flex flex-col flex-1 mt-10 space-y-2">
-                <a href="#" title="" class="flex w-full py-2 font-medium text-white transition-all duration-200 focus:text-opacity-70"> Features </a>
+                <a href="/" title="" class="flex w-full py-2 font-medium text-white transition-all duration-200 focus:text-opacity-70"> Home </a>
 
-                <a href="#" title="" class="flex w-full py-2 font-medium text-white transition-all duration-200 focus:text-opacity-70"> Solutions </a>
+                <a href="/chatbot" title="" class="flex w-full py-2 font-medium text-white transition-all duration-200 focus:text-opacity-70"> Chatbot </a>
 
                 <a href="#" title="" class="flex w-full py-2 font-medium text-white transition-all duration-200 focus:text-opacity-70"> Resources </a>
 
-                <a href="#" title="" class="flex w-full py-2 font-medium text-white transition-all duration-200 focus:text-opacity-70"> Pricing </a>
+                <a href="/contact" title="" class="flex w-full py-2 font-medium text-white transition-all duration-200 focus:text-opacity-70"> Contact </a>
             </nav>
 
             <div class="flex flex-col items-start">

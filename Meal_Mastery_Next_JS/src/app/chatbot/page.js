@@ -4,16 +4,17 @@ import { Header } from '../../components/Header';
 import { Chatbot } from '../../components/Chatbot';
 import ThemeToggle from '@/components/Toogle';
 import IngredientChatbot from '@/components/Ingredients';
+import Footer from '@/components/Footer';
 
 const Chat = () => {
     const [activeChatbot, setActiveChatbot] = useState('chatbot1');
 
     return (
-        <div className='dark:bg-gray-900 dark:text-gray-100 min-h-dvh pb-8 px-8'>
+        <>
+        <Header/>
+        <div className='dark:bg-gray-900 dark:text-gray-100 min-h-dvh pb-8 px-8 mt-6'>
             <div className='flex justify-between items-center'>
 
-            <Header />
-            <ThemeToggle />
             </div>
             
             {/* Buttons to switch between chatbots */}
@@ -35,6 +36,8 @@ const Chat = () => {
             {/* Conditional rendering of chatbots */}
             {activeChatbot === 'chatbot1' ? <Chatbot /> : <IngredientChatbot />}
         </div>
+        <Footer/>
+        </>
     );
 };
 

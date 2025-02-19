@@ -40,14 +40,14 @@ export const Header=()=>{
         </div>
     </div>
 
-    <nav class="flex flex-col justify-between w-full max-w-xs min-h-screen px-4 py-10 bg-black sm:px-6 lg:hidden">
+    <nav class="hidden flex-col justify-between w-full max-w-xs min-h-screen px-4 py-10 bg-black sm:px-6 lg:hidden">
         <button type="button" class="inline-flex p-2 text-white transition-all duration-200 rounded-md focus:bg-gray-800 hover:bg-gray-800">
             <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
             </svg>
         </button>
 
-        <div class="hidden flex-col flex-grow h-full">
+        <div class="flex flex-col flex-grow h-full">
             <nav class="flex flex-col flex-1 mt-10 space-y-2">
                 <a href="/" title="" class="flex w-full py-2 font-medium text-white transition-all duration-200 focus:text-opacity-70"> Home </a>
 

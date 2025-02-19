@@ -26,13 +26,13 @@ export const Header=()=>{
                 </button>
 
                 <div class="hidden lg:flex lg:items-center lg:space-x-10">
-                    <a href="#" title="" class="text-base font-medium text-white"> Features </a>
+                    <a href="#" title="" class="text-base font-medium text-white"> Home </a>
 
-                    <a href="#" title="" class="text-base font-medium text-white"> Solutions </a>
+                    <a href="#" title="" class="text-base font-medium text-white"> Chatbot </a>
 
                     <a href="#" title="" class="text-base font-medium text-white"> Resources </a>
 
-                    <a href="#" title="" class="text-base font-medium text-white"> Pricing </a>
+                    <a href="#" title="" class="text-base font-medium text-white"> Contact </a>
                 </div>
 
                 <a href="#" title="" class="items-center justify-center hidden px-6 py-3 text-base font-semibold text-black transition-all duration-200 bg-yellow-400 border border-transparent rounded-full lg:inline-flex hover:bg-yellow-500 focus:bg-yellow-500" role="button"> Join Now </a>
